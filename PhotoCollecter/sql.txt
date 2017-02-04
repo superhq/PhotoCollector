@@ -1,0 +1,5 @@
+CREATE TABLE `files` (
+	`path`	TEXT NOT NULL,
+	`md5`	TEXT,
+	PRIMARY KEY(`path`)
+);
