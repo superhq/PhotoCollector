@@ -1,6 +1,6 @@
 import os
-import DBOpt
-import CalMd5
+from src import DBOpt
+from src import CalMd5
 class PhotoCollecter():
     def __init__(self,src,dest):
         self.src = src

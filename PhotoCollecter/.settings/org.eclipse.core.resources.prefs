@@ -1,2 +1,4 @@
 eclipse.preferences.version=1
-encoding/CalMd5.py=utf-8
+encoding//src/calmd5.py=utf-8
+encoding//src/collector.py=utf-8
+encoding//test/test_collector.py=utf-8

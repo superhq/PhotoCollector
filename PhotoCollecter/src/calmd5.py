@@ -2,8 +2,8 @@
 
 import hashlib
 
-
-class CalMd5():
+#计算md5值 
+class calmd5():
     def __init__(self):
         pass
     def getmd5(self,path):
