@@ -47,7 +47,7 @@ class TestCollector(unittest.TestCase):
     
     def test_collector(self):
         col = collector()
-        col.collect(r"D:\test")
+        col.collect(r"D:\eclipse-java-photon-R-win32-x86_64")
         print("程序计数值为%d"%(col.count))
 
 

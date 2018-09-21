@@ -15,23 +15,24 @@ class collector():
         收集path目录下的所有文件，并将它们的全路径写入数据库
         """
         tmp = []
-        try:
-            for name in os.listdir(path):
-                fullpath = os.path.join(path,name)
-                if os.path.isdir(fullpath):
-                    self.collect(fullpath)
-                else:
-                    tmp.append((fullpath,''))
-                    print(fullpath)
-                    self.count += 1
-                    #每100个文件执行一次数据库操作
-                    if len(tmp) == 100:
-                        self.dbopt.insertfiles(tmp)
-                        self.files.clear()
-            #将剩余的文件写入数据库
-            self.dbopt.insertfiles(tmp)
-        except Exception as e:
-            print(e)
+
+        for name in os.listdir(path):
+            fullpath = os.path.join(path,name)
+            if os.path.isdir(fullpath):
+                self.collect(fullpath)
+            else:
+                if os.path.isfile(fullpath) == False:
+                    raise(Exception(fullpath + " is link"))
+                tmp.append((fullpath,''))
+                print(fullpath)
+                self.count += 1
+                #每100个文件执行一次数据库操作
+                if len(tmp) == 100:
+                    self.dbopt.insertfiles(tmp)
+                    tmp.clear()
+        #将剩余的文件写入数据库
+        self.dbopt.insertfiles(tmp)
+
 
 
 
