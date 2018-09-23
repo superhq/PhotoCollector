@@ -2,7 +2,7 @@
 import unittest
 from collector import collector
 
-
+@unittest.skip('')
 class TestCollector(unittest.TestCase):
 
     def setUp(self):
@@ -47,7 +47,7 @@ class TestCollector(unittest.TestCase):
     
     def test_collector(self):
         col = collector()
-        col.collect(r"D:\eclipse-java-photon-R-win32-x86_64")
+        col.collect(r"E:\\")
         print("程序计数值为%d"%(col.count))
 
 
