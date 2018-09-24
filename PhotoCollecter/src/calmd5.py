@@ -1,9 +1,9 @@
 # -*- coding:utf-8 -*-
 
 import hashlib
-from dbopt import dbopt
+from dbopt import DbOpt
 #计算md5值 
-class calmd5():
+class Md5Tools():
     def __init__(self):
         pass
     def getmd5(self,path):
@@ -18,8 +18,8 @@ class calmd5():
 class CalDbMd5():
 
     def cal_db_md5(self):
-        opt = dbopt()
-        getmd5 = calmd5()
+        opt = DbOpt()
+        getmd5 = Md5Tools()
         rows = opt.select_unmd5_rows()
         for item in rows:
             file = item[0]

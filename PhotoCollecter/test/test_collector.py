@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 import unittest
-from collector import collector
+from collector import Collector
 
-@unittest.skip('')
+
 class TestCollector(unittest.TestCase):
 
     def setUp(self):
@@ -23,8 +23,8 @@ class TestCollector(unittest.TestCase):
         在所有用例执行前执行
         """
         print('create table')
-        col = collector()
-        col.dbopt.create_table()
+        col = Collector()
+        col.db.create_table()
         
 
     @classmethod
@@ -32,11 +32,12 @@ class TestCollector(unittest.TestCase):
         """
          在所有用例执行后执行
         """
-        col = collector()
-        print("数据库中一共有%d条记录"%(col.dbopt.sum_rows()))
+        col = Collector()
+        print("数据库中一共有%d条记录" % (col.db.sum_rows()))
+        print(col.db.sum_by_suffix())
         print('drop table')
 
-        col.dbopt.drop_table()
+        col.db.drop_table()
     
     @unittest.skip('')    
     def test_collector_less(self):
@@ -44,11 +45,19 @@ class TestCollector(unittest.TestCase):
     @unittest.skip('')
     def test_collector_more(self):
         print('test more')
-    
+
+
     def test_collector(self):
-        col = collector()
+        col = Collector()
         col.collect(r"E:\\")
         print("程序计数值为%d"%(col.count))
+
+    @unittest.skip('')
+    def test_subfix(self):
+        col = Collector()
+        print(col.suffix("abc.TXT"))
+        print(col.suffix("./test_suite.py"))
+        print(col.suffix(r"C:\Users\Qun\PycharmProjects\PhotoCollector\PhotoCollecter\test\test_suite.py"))
 
 
 if __name__ == '__main__':

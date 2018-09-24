@@ -1,7 +1,7 @@
 import sqlite3
 
 
-class dbopt():
+class DbOpt():
 
     def __init__(self, name='photo.db'):
         self.db = sqlite3.connect(name)
@@ -14,6 +14,7 @@ class dbopt():
         c = self.db.cursor()
         c.execute("CREATE TABLE `files` (\
             `path`    TEXT NOT NULL,\
+            `suffix` TEXT,\
             `md5`    TEXT,\
             PRIMARY KEY(`path`)\
             );")
@@ -21,17 +22,16 @@ class dbopt():
     def drop_table(self):
         c = self.db.cursor()
         c.execute("DROP TABLE `files`")
-        
-        
-    def insertfile(self, path, md5=''):
+
+    def insertfile(self, path, suffix, md5=''):
         c = self.db.cursor()
-        c.execute("INSERT OR REPLACE INTO files VALUES('%s','%s')" % (path, md5))
+        c.execute("INSERT OR REPLACE INTO files VALUES('%s','%s','%s')" % (path, suffix, md5))
         self.db.commit()
         c.close()
 
     def insertfiles(self, files):
         # c = self.db.cursor()
-        c = self.db.executemany("INSERT OR REPLACE INTO files(path,md5) VALUES(?,?)", files)
+        c = self.db.executemany("INSERT OR REPLACE INTO files(path,suffix,md5) VALUES(?,?,?)", files)
         self.db.commit()
         rowcount = c.rowcount
         c.close()
@@ -57,3 +57,10 @@ class dbopt():
         sum = c.fetchone()
         c.close()
         return sum
+
+    def sum_by_suffix(self):
+        c = self.db.cursor()
+        c.execute("SELECT suffix,count(path) FROM files group by suffix")
+        rows = c.fetchall()
+        c.close()
+        return rows

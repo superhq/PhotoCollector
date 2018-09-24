@@ -8,6 +8,7 @@ if __name__ == '__main__':
     tests = [TestCollector("test_collector_less"),
              TestCollector('test_collector_more'),
              TestCollector("test_collector"),
+             TestCollector("test_subfix"),
              TestCalDbMd5("test_cal_db_md5"),]
     suite.addTests(tests)
     
