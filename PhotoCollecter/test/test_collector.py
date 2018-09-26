@@ -25,7 +25,7 @@ class TestCollector(unittest.TestCase):
         print('create table')
         col = Collector()
         col.db.create_table()
-        
+
 
     @classmethod
     def tearDownClass(cls):
@@ -35,22 +35,25 @@ class TestCollector(unittest.TestCase):
         col = Collector()
         print("数据库中一共有%d条记录" % (col.db.sum_rows()))
         print(col.db.sum_by_suffix())
+        rows = col.db.select_unprocessed_file_with_filter(suffix_filter=('.png1', 'jpg'))
+        for row in rows:
+            print(row)
         print('drop table')
 
         col.db.drop_table()
-    
-    @unittest.skip('')    
+
+    @unittest.skip('')
     def test_collector_less(self):
         print('test less')
+
     @unittest.skip('')
     def test_collector_more(self):
         print('test more')
 
-
     def test_collector(self):
         col = Collector()
-        col.collect(r"E:\\")
-        print("程序计数值为%d"%(col.count))
+        col.collect(r"C:\\")
+        print("程序计数值为%d" % (col.count))
 
     @unittest.skip('')
     def test_subfix(self):

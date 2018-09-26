@@ -32,8 +32,7 @@ class Collector:
                 if os.path.isdir(fullpath):
                     self.collect(fullpath)
                 else:
-                    tmp.append((fullpath,self.suffix(name), ''))
-                    print(fullpath)
+                    tmp.append((fullpath, self.suffix(name), '', ''))
                     self.count += 1
                     # 每100个文件执行一次数据库操作
                     if len(tmp) == 100:
