@@ -7,7 +7,7 @@ class DbOpt():
         self.db = sqlite3.connect(name)
 
     def __del__(self):
-        #print('close connection')
+        # print('close connection')
         self.db.close()
 
     def create_table(self):
@@ -19,14 +19,14 @@ class DbOpt():
             `dest` TEXT,\
             PRIMARY KEY(`path`)\
             );")
-        
+
     def drop_table(self):
         c = self.db.cursor()
         c.execute("DROP TABLE `files`")
 
-    def insertfile(self, path, suffix, md5='',dest=''):
+    def insertfile(self, path, suffix, md5='', dest=''):
         c = self.db.cursor()
-        c.execute("INSERT OR REPLACE INTO files VALUES('%s','%s','%s')" % (path, suffix, md5,dest))
+        c.execute("INSERT OR REPLACE INTO files VALUES('%s','%s','%s')" % (path, suffix, md5, dest))
         self.db.commit()
         c.close()
 
@@ -67,7 +67,6 @@ class DbOpt():
         c.close()
         return rows
 
-    
     def sum_rows(self):
         c = self.db.cursor()
         c.execute("SELECT count(path) FROM files;")

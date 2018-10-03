@@ -2,14 +2,16 @@
 
 import hashlib
 from dbopt import DbOpt
-#计算md5值 
+
+
+# 计算md5值
 class Md5Tools():
     def __init__(self):
         pass
-    def getmd5(self,path):
+
+    def getmd5(self, path):
         m = hashlib.md5()
-        with open(path,'rb') as f:
-            
+        with open(path, 'rb') as f:
             m.update(f.read())
             ret = m.hexdigest()
         return ret

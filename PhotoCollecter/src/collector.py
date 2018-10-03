@@ -1,17 +1,14 @@
 # -*- coding:utf-8 -*-
 
-from dbopt import DbOpt
-from calmd5 import Md5Tools
 import os
+from res import ResOperator,Res
 
 
 # 收集器。收集源路径中的所有文件的全路径，写入数据库。
 class Collector:
     def __init__(self):
         self.count = 0
-        self.db = DbOpt()
-        self.md5 = Md5Tools()
-
+        self.resopt = ResOperator()
     def suffix(self, fname):
         """
         获取文件的后缀
@@ -32,13 +29,13 @@ class Collector:
                 if os.path.isdir(fullpath):
                     self.collect(fullpath)
                 else:
-                    tmp.append((fullpath, self.suffix(name), '', ''))
+                    tmp.append(Res(fullpath=fullpath))
                     self.count += 1
                     # 每100个文件执行一次数据库操作
                     if len(tmp) == 100:
-                        self.db.insertfiles(tmp)
+                        self.resopt.add(tmp)
                         tmp.clear()
             except Exception as e:
                 print(e)
         # 将剩余的文件写入数据库
-        self.db.insertfiles(tmp)
+        self.resopt.add(tmp)
