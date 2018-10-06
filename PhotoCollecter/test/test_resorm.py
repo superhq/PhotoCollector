@@ -21,3 +21,9 @@ class TestResOrm(unittest.TestCase):
         for i in range(10):
             res_list.append(Res(fullpath=str(uuid.uuid4())))
         opt.add(res_list)
+    @unittest.skip('')
+    def get_suffix_list(self):
+        opt = ResOperator()
+        results = opt.get_suffix_list()
+        for result in results:
+            print(result)

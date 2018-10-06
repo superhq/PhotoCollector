@@ -13,7 +13,8 @@ if __name__ == '__main__':
              TestResOrm("test_add_one"),
              TestResOrm("test_get_all"),
              TestResOrm('test_add'),
-             TestProcessor('test_get_all_res')]
+             TestResOrm('get_suffix_list'),
+             TestProcessor('test_process')]
     suite.addTests(tests)
     
     runner = unittest.TextTestRunner(verbosity=2)

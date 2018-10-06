@@ -2,6 +2,7 @@
 
 from PIL import Image
 from PIL.ExifTags import TAGS
+import os
 
 # img = Image.open(r"E:\huawei-20151212\VID_20151201_205840.mp4")
 # exif_data = img._getexif()
@@ -15,6 +16,7 @@ class FileInfo:
     def getinfo(self, path):
         datetime = None
         maker = None
+        suffix = os.path.splitext(path)[-1].lower()
         try:
             with Image.open(path) as img:
                 exif_data = img._getexif()
@@ -27,7 +29,7 @@ class FileInfo:
                             maker = v
         except Exception as e:
             print(e)
-        return (datetime,maker)
+        return (datetime,maker,suffix)
 
 # from exifread import process_file
 #

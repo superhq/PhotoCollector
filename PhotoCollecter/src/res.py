@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, create_engine, MetaData
+from sqlalchemy import Column, String, Integer, DateTime, create_engine, MetaData,func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -19,7 +19,7 @@ class Res(Base):
                % (self.id, self.fullpath, self.suffix, self.datetime, self.maker, self.topath)
 
 
-engine = create_engine('sqlite:///rs.db')
+engine = create_engine('sqlite:///rs.db', echo=False)
 Base.metadata.create_all(engine)
 DBSession = sessionmaker(bind=engine)
 
@@ -42,11 +42,14 @@ class ResOperator:
         :param values:
         :return:
         """
-        print(values)
         self.session.query(Res).filter_by(fullpath=fullpath).update(values)
         self.session.commit()
 
+    def update_uncommit(self, fullpath, **values):
+        self.session.query(Res).filter_by(fullpath=fullpath).update(values)
 
+    def commit(self):
+        self.session.commit()
 
     def add(self, res_list):
         self.session.add_all(res_list)
@@ -54,3 +57,7 @@ class ResOperator:
 
     def get_all(self):
         return self.session.query(Res).all()
+
+    def get_suffix_list(self):
+        results = self.session.query(Res.suffix,func.count(Res.id)).group_by(Res.suffix)
+        return results
