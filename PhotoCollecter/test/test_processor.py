@@ -6,4 +6,4 @@ from processor import Processor
 class TestProcessor(unittest.TestCase):
     def test_process(self):
         proc = Processor(dest = r'C:\Users\Qun\Desktop')
-        proc.process()
+        proc.process_dest_path()

@@ -1,31 +1,49 @@
 from res import Res, ResOperator
-from fileinfo import FileInfo
+from fileinfo import PhotoInfo
+from common import Status
+import datetime
 import os
+import shutil
+
+
+
 
 
 class Processor:
     def __init__(self, dest):
         self.resopt = ResOperator()
-        self.fileinfo = FileInfo()
+        self.fileinfo = PhotoInfo()
         self.dest = dest
 
-    def process(self):
-        items = self.resopt.get_all()
+    def process_dest_path(self):
+        items = self.resopt.get_all_unready()
         n = 0
         for item in items:
-            (datetime, maker, suffix) = self.fileinfo.getinfo(item.fullpath)
+            (datestr, maker, suffix) = self.fileinfo.getinfo(item.fullpath)
             name = ''
             topath = ''
-            if datetime and suffix:
-                name = datetime.replace(':', '_')
+            status = Status.UNREADY
+            if datestr and suffix:
+                name = datestr.replace(':', '_')
+                dateobj = datetime.datetime.strptime(datestr,'%Y:%m:%d %H:%M:%S')
                 if maker:
                     name = name + ' ' + maker + suffix
                 else:
                     name = name + suffix
-                topath = os.path.join(self.dest, name)
+                topath = os.path.join(self.dest,dateobj.year.__str__(),dateobj.month.__str__(), name)
+                status = Status.REDAY
 
-            self.resopt.update_uncommit(item.fullpath, datetime=datetime, maker=maker, suffix=suffix, topath=topath)
+            self.resopt.update_uncommit(item.fullpath, status=status, datetime=datestr, maker=maker, suffix=suffix, topath=topath)
             n = n + 1
             if n % 100 == 0:
                 self.resopt.commit()
         self.resopt.commit()
+
+    def copy_read_files(self):
+        items = self.resopt.get_all_ready()
+        for res in items:
+            base = os.path.dirname(res.topath)
+            if os.path.exists(base) is False:
+                os.makedirs(os.path.dirname(res.topath))
+            shutil.copy(res.fullpath,res.topath)
+            self.resopt.update_one(res.fullpath,status=Status.OK)
