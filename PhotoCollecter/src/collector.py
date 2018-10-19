@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
 
 import os
+
+from common import Status
 from res import ResOperator,Res
 
 
@@ -29,13 +31,13 @@ class Collector:
                 if os.path.isdir(fullpath):
                     self.collect(fullpath)
                 else:
-                    tmp.append(Res(fullpath=fullpath, suffix=self.suffix(name)))
+                    self.resopt.add(Res(fullpath=fullpath, status=Status.UNREADY, suffix=self.suffix(name)))
                     self.count += 1
-                    # 每100个文件执行一次数据库操作
-                    if len(tmp) == 100:
-                        self.resopt.add(tmp)
-                        tmp.clear()
+                    if self.count % 100 == 0:
+                        self.resopt.commit()
+
             except Exception as e:
                 print(e)
         # 将剩余的文件写入数据库
-        self.resopt.add(tmp)
+        self.resopt.commit()
+

@@ -7,17 +7,17 @@ Base = declarative_base()
 
 class Res(Base):
     __tablename__ = 'res'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    fullpath = Column(String, unique=True, nullable=False)
-    status = Column(Integer)
+    #id = Column(Integer, primary_key=True, autoincrement=True)
+    fullpath = Column(String, primary_key=True)
+    status = Column(Integer,default=Status.UNREADY)
     suffix = Column(String)
     datetime = Column(String)
     maker = Column(String)
     topath = Column(String)
 
     def __repr__(self):
-        return 'id=%d,fullpath=%s,status=%d,suffix=%s,datetime=%s,maker=%s,topath=%s' \
-               % (self.id, self.fullpath,self.status, self.suffix, self.datetime, self.maker, self.topath)
+        return 'fullpath=%s,status=%d,suffix=%s,datetime=%s,maker=%s,topath=%s' \
+               % (self.fullpath,self.status, self.suffix, self.datetime, self.maker, self.topath)
 
 
 engine = create_engine('sqlite:///rs.db', echo=False)
@@ -52,15 +52,25 @@ class ResOperator:
     def commit(self):
         self.session.commit()
 
-    def add(self, res_list):
-        self.session.add_all(res_list)
-        self.session.commit()
+    def flush(self):
+        self.session.flush()
+
+    # def add(self, res_list):
+    #     self.session.add_all(res_list)
+    #     self.session.commit()
+    def add(self,res):
+        result = self.session.query(Res).filter(Res.fullpath==res.fullpath).one_or_none()
+        if result:
+            #pass
+            print(result)
+        else:
+            self.session.add(res)
 
     def get_all(self):
         return self.session.query(Res).all()
 
     def get_suffix_list(self):
-        results = self.session.query(Res.suffix,func.count(Res.id)).group_by(Res.suffix)
+        results = self.session.query(Res.suffix,func.count(Res.fullpath)).group_by(Res.suffix).all()
         return results
 
     def get_all_ready(self):
