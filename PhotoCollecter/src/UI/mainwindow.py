@@ -1,6 +1,6 @@
 from Ui_MainWindow import Ui_MainWindow
 from PyQt5.QtWidgets import QMainWindow,QFileDialog
-from PyQt5.QtChart import QChart,QBarSeries,QBarSet,QBarCategoryAxis
+from PyQt5.QtChart import QChart,QPieSeries,QPieSlice
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QPainter
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -9,9 +9,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.collector = collector
         self.srcEdit.setText(r'E:\20160610')
-        chart = QChart()
-        chart.setTitle('文件统计')
-        self.chart.setChart(chart)
+        self.chart = QChart()
+        self.chart.setTheme(QChart.ChartThemeQt)
+        self.chart.setTitle("文件类型统计")
+        self.chartView.setChart(self.chart)
 
     @pyqtSlot()
     def on_srcPushButton_clicked(self):
@@ -28,29 +29,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if dialog.exec_():
             self.destEdit.setText(dialog.selectedFiles()[0])
 
+    @pyqtSlot(QPieSlice)
+    def on_pieSeries_doubleliecked(self,slice):
+        print(slice)
+
     @pyqtSlot()
     def on_collectPushButton_clicked(self):
         if self.collector:
             self.collector.collect(self.srcEdit.text())
             suffix_list = self.collector.resopt.get_suffix_list()
-            chart = QChart()
-            chart.setTitle('文件统计')
-            series = QBarSeries()
+            self.chart.removeAllSeries()
+            series = QPieSeries()
             for (suffix,count) in suffix_list:
+                series.append(suffix,count)
+            series.setLabelsVisible(True)
 
-                qset = QBarSet(suffix)
-                qset.append(count)
-                series.append(qset)
-            chart.addSeries(series)
-
-            axis = QBarCategoryAxis()
-            for (suffix,_) in suffix_list:
-                axis.append(suffix)
-            chart.setAnimationOptions(QChart.SeriesAnimations)
-            chart.createDefaultAxes()
-            chart.setAxisX(axis,series)
-            chart.legend().setVisible(True)
-            self.chart.setChart(chart)
-            self.chart.setRenderHint(QPainter.Antialiasing)
+            self.chart.addSeries(series)
 
 

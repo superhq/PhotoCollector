@@ -69,7 +69,7 @@
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QChartView" name="chart" native="true"/>
+         <widget class="QChartView" name="chartView" native="true"/>
         </item>
        </layout>
       </item>
