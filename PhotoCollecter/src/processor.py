@@ -10,30 +10,49 @@ import shutil
 
 
 class Processor:
-    def __init__(self, dest):
+    def __init__(self):
         self.resopt = ResOperator()
         self.fileinfo = PhotoInfo()
+
+    def setdest(self,dest):
         self.dest = dest
 
+    def process_dest_file(self,item):
+        (datestr, maker, suffix) = self.fileinfo.getinfo(item.fullpath)
+        name = ''
+        topath = ''
+        status = Status.UNREADY
+        if datestr and suffix:
+            name = datestr.replace(':', '_')
+            dateobj = datetime.datetime.strptime(datestr, '%Y:%m:%d %H:%M:%S')
+            if maker:
+                name = name + ' ' + maker + suffix
+            else:
+                name = name + suffix
+            topath = os.path.join(self.dest, dateobj.year.__str__(), dateobj.month.__str__(), name)
+            status = Status.REDAY
+        self.resopt.update_uncommit(item.fullpath, status=status, datetime=datestr, maker=maker, suffix=suffix,
+                                    topath=topath)
     def process_dest_path(self):
         items = self.resopt.get_all_unready()
         n = 0
         for item in items:
-            (datestr, maker, suffix) = self.fileinfo.getinfo(item.fullpath)
-            name = ''
-            topath = ''
-            status = Status.UNREADY
-            if datestr and suffix:
-                name = datestr.replace(':', '_')
-                dateobj = datetime.datetime.strptime(datestr,'%Y:%m:%d %H:%M:%S')
-                if maker:
-                    name = name + ' ' + maker + suffix
-                else:
-                    name = name + suffix
-                topath = os.path.join(self.dest,dateobj.year.__str__(),dateobj.month.__str__(), name)
-                status = Status.REDAY
-
-            self.resopt.update_uncommit(item.fullpath, status=status, datetime=datestr, maker=maker, suffix=suffix, topath=topath)
+            # (datestr, maker, suffix) = self.fileinfo.getinfo(item.fullpath)
+            # name = ''
+            # topath = ''
+            # status = Status.UNREADY
+            # if datestr and suffix:
+            #     name = datestr.replace(':', '_')
+            #     dateobj = datetime.datetime.strptime(datestr,'%Y:%m:%d %H:%M:%S')
+            #     if maker:
+            #         name = name + ' ' + maker + suffix
+            #     else:
+            #         name = name + suffix
+            #     topath = os.path.join(self.dest,dateobj.year.__str__(),dateobj.month.__str__(), name)
+            #     status = Status.REDAY
+            #
+            # self.resopt.update_uncommit(item.fullpath, status=status, datetime=datestr, maker=maker, suffix=suffix, topath=topath)
+            self.process_dest_file(item)
             n = n + 1
             if n % 100 == 0:
                 self.resopt.commit()

@@ -61,8 +61,8 @@ class ResOperator:
     def add(self,res):
         result = self.session.query(Res).filter(Res.fullpath==res.fullpath).one_or_none()
         if result:
-            #pass
-            print(result)
+            pass
+            #print(result)
         else:
             self.session.add(res)
 
@@ -78,6 +78,8 @@ class ResOperator:
 
     def get_all_unready(self):
         return  self.session.query(Res).filter_by(status=Status.UNREADY)
+    def count_all_unread(self):
+        return self.session.query(func.count(Res.fullpath)).filter_by(status=Status.UNREADY).one()[0]
 
     def get_all_ok(self):
         return self.session.query(Res).filter_by(status=Status.OK)

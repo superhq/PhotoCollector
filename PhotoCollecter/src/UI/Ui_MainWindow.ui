@@ -19,17 +19,13 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="srcEdit">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-         </widget>
+        <item row="3" column="1">
+         <widget class="QChartView" name="chartView" native="true"/>
         </item>
-        <item row="1" column="2">
-         <widget class="QPushButton" name="destPushButton">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>选择</string>
+           <string>整理到：</string>
           </property>
          </widget>
         </item>
@@ -40,13 +36,6 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>整理到：</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label">
           <property name="text">
@@ -54,10 +43,10 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
-         <widget class="QPushButton" name="collectPushButton">
+        <item row="1" column="2">
+         <widget class="QPushButton" name="destPushButton">
           <property name="text">
-           <string>收集</string>
+           <string>选择</string>
           </property>
          </widget>
         </item>
@@ -68,8 +57,48 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
-         <widget class="QChartView" name="chartView" native="true"/>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="srcEdit">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QPushButton" name="collectPushButton">
+            <property name="text">
+             <string>收集</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="processPushButton">
+            <property name="text">
+             <string>处理</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QProgressBar" name="progressBar">
+            <property name="value">
+             <number>24</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="progressLabel">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
