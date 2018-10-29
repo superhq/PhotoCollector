@@ -1,4 +1,4 @@
-from Ui_MainWindow import Ui_MainWindow
+from .Ui_MainWindow import Ui_MainWindow
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from PyQt5.QtChart import QChart, QPieSeries, QPieSlice
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QThread, QObject
@@ -15,64 +15,52 @@ from res import ResOperator
 # ３.调试模式下正常，直接运行时收集功能不正常
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    # 自定义信号
-    # 完成源路径文件的收集
-    collect_thread_finished = pyqtSignal()
-    # 完成目标路径的生成
-    process_destpath_thread_finished = pyqtSignal()
-    # 正在生成目录路径
-    process_destpath_thread_running = pyqtSignal(int, str)
+    # # 自定义信号
+    # # 完成源路径文件的收集
+    # collect_finished = pyqtSignal()
+    # # 完成目标路径的生成
+    # make_dest_finished = pyqtSignal()
+    # # 正在生成目录路径
+    # make_dest_running = pyqtSignal(int, str)
 
-    class _CollectThread(QThread):
-        def __init__(self, outer):
-            super().__init__()
-            self.collector = Collector()
-            self.outer = outer
-            self.finished.connect(self._finished)
-
-        # 任务完成后向主线程发送已完成的信号
-        @pyqtSlot()
-        def _finished(self):
-            self.outer.collect_thread_finished.emit()
-
-        # 收集源路径下的所有文件
-        def run(self):
-            self.collector.collect(self.outer.srcEdit.text())
-
-    class _CollectWorker(QObject):
+    class _CollectTask(QObject):
+        # 任务完成的信号
         done = pyqtSignal()
-        def __init__(self,cls_ui):
+
+        def __init__(self, src):
             super().__init__()
-            self.cls_ui = cls_ui
+            self.src = src
             self.collector = Collector()
 
         @pyqtSlot()
         def doWork(self):
-            self.collector.collect(self.cls_ui.srcEdit.text())
-            #self.emit(self.done)
-            self.cls_ui.collect_thread_finished.emit()
+            self.collector.collect(self.src)
+            self.done.emit()
 
+    class _MakeDestTask(QObject):
+        done = pyqtSignal()
+        update = pyqtSignal(int, str)
 
-    class _ProcessDestPath(QThread):
-        def __init__(self, outer):
+        def __init__(self, dest):
             super().__init__()
-            self.outer = outer
-            self.processor = None
+            self.dest = dest
 
-        def run(self):
-            self.resopt = ResOperator()
+        @pyqtSlot()
+        def doWork(self):
             self.processor = Processor()
-            self.processor.setdest(self.outer.destEdit.text())
+            self.processor.setdest(self.dest)
+            self.resopt = self.processor.resopt
             items = self.resopt.get_all_unready()
             n = 0
             for item in items:
                 self.processor.process_dest_file(item)
                 n = n + 1
                 # 发送正在生成目标路径的信号
-                self.outer.process_destpath_thread_running.emit(n, item.fullpath)
+                self.update.emit(n, item.fullpath)
                 if n % 100 == 0:
                     self.resopt.commit()
             self.resopt.commit()
+            self.done.emit()
 
     def __init__(self, collector=None):
         super(MainWindow, self).__init__()
@@ -86,21 +74,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.chart.setTitle("文件类型统计")
         self.chartView.setChart(self.chart)
         self.progressBar.hide()
-        # 收集线程
-        # self.collectWorker = MainWindow._CollectWorker(self)
-        # self.collectWorkerThread = QThread()
-        # self.collectWorker.moveToThread(self.collectWorkerThread)
-        # self.collectWorkerThread.started.connect(self.collectWorker.doWork)
-
-        # self.collect_thread = MainWindow._CollectThread(self)
-        # self.collect_thread_finished.connect(self.on_collect_thread_finished)
-        # self.process_destpath_thread = MainWindow._ProcessDestPath(self)
-        # self.process_destpath_thread_running.connect(self.on_process_destpath_thread_running)
-        self.collect_thread_finished.connect(self.on_collect_thread_finished)
+        self.collectThread = None
+        self.makeDestThread = None
 
     # 在线程中已完成了文件的收集，在这里更新UI
     @pyqtSlot()
-    def on_collect_thread_finished(self):
+    def on_collect_finished(self):
         # 输出后缀统计扇形图
         suffix_list = self.resopt.get_suffix_list()
         self.chart.removeAllSeries()
@@ -114,12 +93,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.progressBar.hide()
 
     @pyqtSlot()
-    def on_process_destpath_thread_finished(self):
-        pass
+    def on_make_dest_finished(self):
+        self.processPushButton.setEnabled(True)
 
     # 正在生成目标文件路径
     @pyqtSlot(int, str)
-    def on_process_destpath_thread_running(self, count, path):
+    def on_make_dest_running(self, count, path):
         self.progressBar.setValue(count)
         self.progressLabel.setText(path)
 
@@ -139,8 +118,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.progressBar.setMinimum(0)
         self.progressBar.setMaximum(count)
         self.progressBar.show()
+        self.processPushButton.setDisabled(True)
         if self.destEdit.text() is not '':
-            self.process_destpath_thread.start()
+            # self.process_destpath_thread.start()
+            self.makeDestTask = MainWindow._MakeDestTask(self.destEdit.text())
+            self.makeDestThread = QThread()
+            self.makeDestTask.moveToThread(self.makeDestThread)
+            self.makeDestThread.started.connect(self.makeDestTask.doWork)
+            self.makeDestTask.done.connect(self.makeDestThread.quit)
+            self.makeDestTask.update.connect(self.on_make_dest_running)
+            self.makeDestThread.finished.connect(self.on_make_dest_finished)
+            self.makeDestThread.start()
 
     # 选择目标路径
     @pyqtSlot()
@@ -151,18 +139,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if dialog.exec_():
             self.destEdit.setText(dialog.selectedFiles()[0])
 
-
     # 开始收集源路径中的文件
     @pyqtSlot()
     def on_collectPushButton_clicked(self):
+        # 设置UI
         self.progressBar.setMinimum(0)
         self.progressBar.setMaximum(0)
         self.progressBar.show()
-        # self.collectPushButton.setDisabled(True)
-        # self.collect_thread.start()
-        self.collectWorker = MainWindow._CollectWorker(self)
-        self.collectWorkerThread = QThread()
-        self.collectWorker.moveToThread(self.collectWorkerThread)
-        self.collectWorkerThread.started.connect(self.collectWorker.doWork)
-        self.collectWorkerThread.start()
-
+        self.collectPushButton.setDisabled(True)
+        # 创建任务
+        self.collectWorker = MainWindow._CollectTask(self.srcEdit.text())
+        # 将任务移入线程
+        self.collectThread = QThread()
+        self.collectWorker.moveToThread(self.collectThread)
+        # 线程的started信号接入任务的doWork槽
+        self.collectThread.started.connect(self.collectWorker.doWork)
+        # 任务完成信号(done)接入线程的quit槽
+        self.collectWorker.done.connect(self.collectThread.quit)
+        # 线程完成后，更新ui
+        self.collectThread.finished.connect(self.on_collect_finished)
+        # 启动
+        self.collectThread.start()
