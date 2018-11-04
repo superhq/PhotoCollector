@@ -10,9 +10,9 @@ from res import ResOperator
 
 
 # 存在的问题
-# 1.批量写数据库时不应该回滚
+
 # 2.处理大量文件会自动退出
-# ３.调试模式下正常，直接运行时收集功能不正常
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     # # 自定义信号
@@ -62,6 +62,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.resopt.commit()
             self.done.emit()
 
+    class _CopyTask(QObject):
+        update = pyqtSignal(int, str)
+        done = pyqtSignal()
+
+        def __init__(self):
+            super().__init__()
+
+        def doWork(self):
+            processor = Processor()
+            n = 0
+            for item in processor.resopt.get_all_ready():
+                n = n + 1
+                processor.copy_one_file(item.fullpath,item.topath)
+                self.update.emit(n, item.fullpath)
+            self.done.emit()
+
     def __init__(self, collector=None):
         super(MainWindow, self).__init__()
 
@@ -76,6 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.progressBar.hide()
         self.collectThread = None
         self.makeDestThread = None
+        self.copyThread = None
 
     # 在线程中已完成了文件的收集，在这里更新UI
     @pyqtSlot()
@@ -93,6 +110,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.progressBar.hide()
 
     @pyqtSlot()
+    def on_copy_finished(self):
+        self.progressLabel.setText("完成复制")
+
+    @pyqtSlot()
     def on_make_dest_finished(self):
         self.processPushButton.setEnabled(True)
 
@@ -100,7 +121,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(int, str)
     def on_make_dest_running(self, count, path):
         self.progressBar.setValue(count)
-        self.progressLabel.setText(path)
+        self.progressLabel.setText("计算目标路径:" + path)
+
+    # 正在复制文件
+    def on_copy_running(self, count, path):
+        self.progressBar.setValue(count)
+        self.progressLabel.setText("复制文件:" + path)
 
     # 选择源路径
     @pyqtSlot()
@@ -160,3 +186,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.collectThread.finished.connect(self.on_collect_finished)
         # 启动
         self.collectThread.start()
+
+    # 开始复制文件
+    @pyqtSlot()
+    def on_copyPushButton_clicked(self):
+        count = self.resopt.count_all_ready()
+        if count:
+            self.progressBar.show()
+            self.progressBar.setValue(0)
+            self.progressBar.setMinimum(0)
+            self.progressBar.setMaximum(count)
+            self.copyWorker = MainWindow._CopyTask()
+            self.copyThread = QThread()
+            self.copyWorker.moveToThread(self.copyThread)
+            self.copyThread.started.connect(self.copyWorker.doWork)
+            self.copyWorker.update.connect(self.on_copy_running)
+            self.copyWorker.done.connect(self.copyThread.quit)
+            self.copyThread.finished.connect(self.on_copy_finished)
+            self.copyThread.start()

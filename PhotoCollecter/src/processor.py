@@ -6,18 +6,15 @@ import os
 import shutil
 
 
-
-
-
 class Processor:
     def __init__(self):
         self.resopt = ResOperator()
         self.fileinfo = PhotoInfo()
 
-    def setdest(self,dest):
+    def setdest(self, dest):
         self.dest = dest
 
-    def process_dest_file(self,item):
+    def process_dest_file(self, item):
         (datestr, maker, suffix) = self.fileinfo.getinfo(item.fullpath)
         name = ''
         topath = ''
@@ -33,6 +30,7 @@ class Processor:
             status = Status.REDAY
         self.resopt.update_uncommit(item.fullpath, status=status, datetime=datestr, maker=maker, suffix=suffix,
                                     topath=topath)
+
     def process_dest_path(self):
         items = self.resopt.get_all_unready()
         n = 0
@@ -64,5 +62,12 @@ class Processor:
             base = os.path.dirname(res.topath)
             if os.path.exists(base) is False:
                 os.makedirs(os.path.dirname(res.topath))
-            shutil.copy(res.fullpath,res.topath)
-            self.resopt.update_one(res.fullpath,status=Status.OK)
+            shutil.copy(res.fullpath, res.topath)
+            self.resopt.update_one(res.fullpath, status=Status.OK)
+
+    def copy_one_file(self, src, dest):
+        base = os.path.dirname(dest)
+        if os.path.exists(base) is False:
+            os.makedirs(base)
+        shutil.copy(src, dest)
+        self.resopt.update_one(src, status=Status.OK)

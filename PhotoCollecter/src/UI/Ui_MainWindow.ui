@@ -76,7 +76,14 @@
           <item>
            <widget class="QPushButton" name="processPushButton">
             <property name="text">
-             <string>处理</string>
+             <string>预处理</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="copyPushButton">
+            <property name="text">
+             <string>复制</string>
             </property>
            </widget>
           </item>

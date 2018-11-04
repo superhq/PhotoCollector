@@ -51,6 +51,9 @@ class Ui_MainWindow(object):
         self.processPushButton = QtWidgets.QPushButton(self.centralwidget)
         self.processPushButton.setObjectName("processPushButton")
         self.verticalLayout_3.addWidget(self.processPushButton)
+        self.copyPushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.copyPushButton.setObjectName("copyPushButton")
+        self.verticalLayout_3.addWidget(self.copyPushButton)
         self.gridLayout_2.addLayout(self.verticalLayout_3, 2, 2, 1, 1)
         self.verticalLayout_4 = QtWidgets.QVBoxLayout()
         self.verticalLayout_4.setObjectName("verticalLayout_4")
@@ -88,6 +91,7 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "待处理："))
         self.destPushButton.setText(_translate("MainWindow", "选择"))
         self.collectPushButton.setText(_translate("MainWindow", "收集"))
-        self.processPushButton.setText(_translate("MainWindow", "处理"))
+        self.processPushButton.setText(_translate("MainWindow", "预处理"))
+        self.copyPushButton.setText(_translate("MainWindow", "复制"))
 
 from PyQt5.QtChart import QChartView
