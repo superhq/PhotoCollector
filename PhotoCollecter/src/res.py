@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, create_engine, MetaData, func
+from sqlalchemy import Column, String, Integer, DateTime, create_engine, MetaData, func, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from common import Status
@@ -21,7 +21,7 @@ class Res(Base):
                % (self.fullpath, self.status, self.suffix, self.datetime, self.maker, self.topath)
 
 
-engine = create_engine('sqlite:///rs.db', echo=False)
+engine = create_engine('sqlite:///rs.db', echo=True)
 Base.metadata.create_all(engine)
 DBSession = sessionmaker(bind=engine)
 
@@ -70,9 +70,13 @@ class ResOperator:
     def get_all(self):
         return self.session.query(Res).all()
 
-    def get_suffix_list(self):
-        results = self.session.query(Res.suffix, func.count(Res.fullpath)).group_by(Res.suffix).all()
+    def get_suffix_list(self,limit=None):
+        results = self.session.query(Res.suffix, func.count(Res.fullpath).label('count')).group_by(Res.suffix).order_by(
+            text('count desc')).limit(limit).all()
         return results
+
+    def count_all(self):
+        return self.session.query(func.count(Res.fullpath)).one()[0]
 
     def get_all_ready(self):
         return self.session.query(Res).filter_by(status=Status.REDAY)
